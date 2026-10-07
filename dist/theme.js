@@ -1,0 +1,3 @@
+window.tarrasqueThemes={dark:['#282c34','#9cdef2','#111111','#355a66','#e06c75'],light:['#f0ebe3','#5a5248','#faf6f0','#d4cdc2','#c47d5a'],forest:['#1b2a1b','#a8d5a2','#142414','#3d6b3d','#7cb871'],terminal:['#000000','#00ff41','#0a0a0a','#003b00','#00ff41']};
+window.applyTheme=function(name){const colors=tarrasqueThemes[name]||tarrasqueThemes.dark;['bg','fg','panel','border','accent'].forEach((key,i)=>document.documentElement.style.setProperty('--'+key,colors[i]));document.documentElement.style.colorScheme=name==='light'?'light':'dark';document.querySelector('meta[name="theme-color"]').content=colors[0]};
+try{applyTheme(localStorage.getItem('tarrasque-theme')||'dark')}catch{applyTheme('dark')}
