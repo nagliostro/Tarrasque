@@ -1,0 +1,43 @@
+/* Paletas: [bg, fg, panel, border, accent]. Fonte de verdade: docs/design.md */
+:root,
+[data-theme='dark'] {
+  --bg: #282c34;
+  --fg: #9cdef2;
+  --panel: #111111;
+  --border: #355a66;
+  --accent: #e06c75;
+  color-scheme: dark;
+}
+[data-theme='light'] {
+  --bg: #f0ebe3;
+  --fg: #5a5248;
+  --panel: #faf6f0;
+  --border: #d4cdc2;
+  --accent: #c47d5a;
+  color-scheme: light;
+}
+[data-theme='forest'] {
+  --bg: #1b2a1b;
+  --fg: #a8d5a2;
+  --panel: #142414;
+  --border: #3d6b3d;
+  --accent: #7cb871;
+  color-scheme: dark;
+}
+[data-theme='terminal'] {
+  --bg: #000000;
+  --fg: #00ff41;
+  --panel: #0a0a0a;
+  --border: #003b00;
+  --accent: #00ff41;
+  color-scheme: dark;
+}
+
+/* Links com a aparência dos botões do legado */
+a.nav-item {
+  color: inherit;
+  text-decoration: none;
+}
+a.nav-item.active {
+  color: var(--accent);
+}

@@ -1,0 +1,8 @@
+legacy
+.next
+node_modules
+pnpm-lock.yaml
+prisma/migrations
+src/generated
+src/styles/globals.css
+src/styles/sheet.css

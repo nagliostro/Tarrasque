@@ -1,0 +1,13 @@
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Tokens do Tarrasque expostos ao Tailwind (sem preflight: o CSS legado já faz o reset) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-panel: var(--panel);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --font-mono: var(--font-fira), 'Fira Code', monospace;
+}

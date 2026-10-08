@@ -2,6 +2,13 @@
 .env.*
 !.env.example
 node_modules/
-.sites-runtime/
+.next/
+out/
+next-env.d.ts
+src/generated/
+playwright-report/
+test-results/
+*.tsbuildinfo
 .DS_Store
 *.log
+.claude/settings.local.json

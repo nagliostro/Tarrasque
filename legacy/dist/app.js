@@ -25,7 +25,7 @@ $('toggle').onclick=()=>{if(mobile.matches)$('sidebar').classList.toggle('mobile
 function closeNav(){ $('sidebar').classList.remove('mobile-open');sidebar()}
 $('backdrop').onclick=()=>{closeNav();$('toggle').focus()};mobile.addEventListener('change',closeNav);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dialog').open&&mobile.matches){closeNav();$('toggle').focus()}});
-function render(){cancelDiceRoll();const config=sections[page],isDice=page==='dados';
+function render(){cancelDiceRoll();if(typeof closeSheet==='function')closeSheet();const config=sections[page],isDice=page==='dados';
 $('crumb').textContent=config.title;$('page-title').replaceChildren(document.createTextNode(config.title),Object.assign(document.createElement('span'),{textContent:'.'}));$('subtitle').textContent=config.description;$('subtitle').hidden=!config.description;
 $('new-top').hidden=isDice;$('search-wrap').hidden=isDice;$('dice-tool').hidden=!isDice;document.querySelector('.section-line').hidden=isDice;
 $('cards').replaceChildren();$('empty').hidden=true;
@@ -37,7 +37,7 @@ for(const {item,index} of filtered){const card=document.createElement('article')
 document.querySelectorAll('[data-page]').forEach(button=>{const active=button.dataset.page===page;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});document.title=sections[page].title+' · Tarrasque';}
 function navigate(){page=sections[location.hash.slice(1)]?location.hash.slice(1):'personagem';$('search').value='';render();closeNav()}
 window.addEventListener('hashchange',navigate);document.querySelectorAll('[data-page]').forEach(button=>button.onclick=()=>{if(location.hash==='#'+button.dataset.page)closeNav();else location.hash=button.dataset.page});$('search').oninput=render;
-function open(kind,index=-1){mode=kind;editing=index;
+function open(kind,index=-1){if(kind==='new'&&page==='personagem')return openSheet(index);mode=kind;editing=index;
 if(kind==='settings'){ $('dialog-title').textContent='Configurações';$('dialog-body').innerHTML='<label for="theme">Tema da aplicação<select id="theme"><option value="dark">Original · Odysseus</option><option value="light">Light</option><option value="forest">Forest</option><option value="terminal">Terminal</option></select></label><p class="hint">Sua preferência de aparência será salva neste navegador.</p>';try{$('theme').value=localStorage.getItem('tarrasque-theme')||'dark'}catch{}}
 else if(kind==='profile'){ $('dialog-title').textContent='Seu perfil';$('dialog-body').innerHTML='<label for="name">Nome de exibição<input id="name" required maxlength="32" autocomplete="nickname"></label>';$('name').value=profile}
 else{const config=sections[page];$('dialog-title').textContent=index>=0?'Editar registro':config.action;$('dialog-body').innerHTML='<label for="name">Nome<input id="name" required maxlength="80"></label><label for="detail">'+config.field+'<textarea id="detail" rows="6" maxlength="6000"></textarea></label><p class="hint">Coleção pessoal, salva neste navegador. Não inclui o catálogo oficial do D&D Beyond.</p>';$('detail').placeholder=config.placeholder;if(index>=0){$('name').value=records[page][index].name;$('detail').value=records[page][index].detail||''}}
