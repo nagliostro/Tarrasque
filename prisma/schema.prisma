@@ -105,7 +105,17 @@ model CollectionEntry {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  @@index([userId, kind])
+  @@index([userId, kind, createdAt])
+}
+
+// --- rate limit (janela fixa por chave; usado pelas Server Actions de auth) ---
+
+model RateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+
+  @@map("rate_limit")
 }
 
 // --- characters ---

@@ -6,6 +6,7 @@ import '@/styles/tailwind.css';
 import '@/styles/theme.css';
 import '@/styles/globals.css';
 import '@/styles/sheet.css';
+import '@/styles/auth.css';
 
 const fira = localFont({
   src: './fonts/FiraCode.woff2',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { Icon } from './icon';
 
 interface DialogProps {
@@ -9,11 +9,33 @@ interface DialogProps {
   onClose: () => void;
   onSubmit: (data: FormData) => void;
   children: React.ReactNode;
+  /** Texto do botão de envio (padrão: "Salvar"). */
+  submitLabel?: string;
+  /** Envio destrutivo: usa o estilo `secondary danger` em vez do botão primário. */
+  danger?: boolean;
+  /** Desabilita o envio enquanto uma ação está em andamento. */
+  pending?: boolean;
+  /** Mantém o formulário montado (e o rascunho) enquanto o diálogo está fechado. */
+  keepMounted?: boolean;
+  /** Ação extra alinhada à esquerda do rodapé (ex.: "Excluir"). */
+  footerStart?: React.ReactNode;
 }
 
 /** <dialog> nativo com showModal, no mesmo markup do legado. */
-export function Dialog({ open, title, onClose, onSubmit, children }: DialogProps) {
+export function Dialog({
+  open,
+  title,
+  onClose,
+  onSubmit,
+  children,
+  submitLabel = 'Salvar',
+  danger = false,
+  pending = false,
+  footerStart,
+  keepMounted = false,
+}: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -23,8 +45,8 @@ export function Dialog({ open, title, onClose, onSubmit, children }: DialogProps
   }, [open]);
 
   return (
-    <dialog ref={ref} onClose={onClose} aria-labelledby="dialog-title">
-      {open && (
+    <dialog ref={ref} onClose={onClose} aria-labelledby={titleId}>
+      {(open || keepMounted) && (
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -32,18 +54,23 @@ export function Dialog({ open, title, onClose, onSubmit, children }: DialogProps
           }}
         >
           <div className="dialog-header">
-            <h2 id="dialog-title">{title}</h2>
+            <h2 id={titleId}>{title}</h2>
             <button type="button" className="icon-button" aria-label="Fechar" onClick={onClose}>
               <Icon name="close-icon" />
             </button>
           </div>
           {children}
           <div className="dialog-actions">
+            {footerStart && <span style={{ marginRight: 'auto' }}>{footerStart}</span>}
             <button type="button" className="secondary" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className="primary">
-              Salvar
+            <button
+              type="submit"
+              className={danger ? 'secondary danger' : 'primary'}
+              disabled={pending}
+            >
+              {submitLabel}
             </button>
           </div>
         </form>

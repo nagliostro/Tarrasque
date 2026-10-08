@@ -8,9 +8,6 @@ export const THEMES = {
 export type ThemeName = keyof typeof THEMES;
 
 export const THEME_COOKIE = 'tarrasque-theme';
-export const SIDEBAR_COOKIE = 'tarrasque-collapsed';
-export const PROFILE_COOKIE = 'tarrasque-profile';
-export const DEFAULT_PROFILE = 'Aventureiro';
 
 export function parseTheme(value: string | undefined): ThemeName {
   return value && value in THEMES ? (value as ThemeName) : 'dark';

@@ -47,3 +47,5 @@ Personagem (lista + ficha em 3 abas: Ficha, Detalhes, Magias), Campanha, Encontr
 ## Diferenças intencionais em relação ao legado
 
 - Textos que diziam "salva neste navegador" foram removidos (os dados passam a viver no servidor).
+- Tema claro: `--muted` usa 90% de `--fg` (era 70%) para o texto secundário atingir contraste AA (5,1:1; antes 3,3:1). Nos demais temas segue 70%.
+- Telas de login/cadastro (novas): rótulo flutuante dentro do campo, borda dos campos com 70% de `--fg` (≥ 3:1), formulário à esquerda e capa escura à direita no desktop.

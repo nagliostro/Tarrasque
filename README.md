@@ -23,12 +23,12 @@ Qualidade: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm e2e`.
 A migração é feita por fases (detalhes em `docs/architecture.md`):
 
 1. **Fundação** (concluída): projeto, casca visual idêntica ao original (sidebar, topbar, temas, diálogos), schema Prisma, ambiente de agents/hooks.
-2. Identidade e coleções (próxima).
+2. **Identidade e coleções** (concluída): contas, preferências no servidor e CRUD das coleções.
 3. Ficha de personagem.
 4. Dados.
 5. Polimento, importador do `localStorage` e deploy.
 
-Até a fase 2, listas, busca e criação de registros ainda não estão ativas; o app original completo permanece em `legacy/dist` e pode ser aberto direto no navegador.
+Personagem (ficha) e Dados ainda não estão ativos na nova versão (fases 3 e 4); o app original completo permanece em `legacy/dist`.
 
 ## Estrutura
 

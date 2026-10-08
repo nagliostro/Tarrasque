@@ -1,4 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { registerUser, expect, test } from './support';
+
+test.beforeEach(async ({ page }) => {
+  await registerUser(page);
+});
 
 test('raiz redireciona para Personagem e marca o item ativo', async ({ page }) => {
   await page.goto('/');
@@ -10,12 +14,13 @@ test('raiz redireciona para Personagem e marca o item ativo', async ({ page }) =
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Personagem.');
 });
 
-test('tema escolhido persiste por cookie (SSR, sem flash)', async ({ page }) => {
+test('tema escolhido persiste no servidor (SSR, sem flash)', async ({ page }) => {
   await page.goto('/campanha');
   await page.getByRole('button', { name: 'Configurações' }).click();
-  await page.getByLabel('Tema').selectOption('forest');
+  await page.locator('select[name=theme]').selectOption('forest');
   await page.getByRole('button', { name: 'Salvar' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'forest');
+  await expect(page.locator('#toast')).toHaveText('Configurações salvas.');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'forest');
 });
@@ -24,6 +29,8 @@ test('sidebar recolhe e lembra o estado', async ({ page }) => {
   await page.goto('/magias');
   await page.getByRole('button', { name: 'Recolher sidebar' }).click();
   await expect(page.locator('#sidebar')).toHaveClass(/collapsed/);
+  // Espera a Server Action persistir antes de recarregar.
+  await page.waitForTimeout(500);
   await page.reload();
   await expect(page.locator('#sidebar')).toHaveClass(/collapsed/);
 });

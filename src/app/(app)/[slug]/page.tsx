@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Icon, SECTIONS, findSection } from '@/modules/shared';
-
-export function generateStaticParams() {
-  return SECTIONS.map(({ slug }) => ({ slug }));
-}
+import { CollectionView, collectionKindFor, listEntries } from '@/modules/collections';
+import { requireUser } from '@/modules/identity';
+import { Icon, findSection } from '@/modules/shared';
 
 export async function generateMetadata({ params }: PageProps<'/[slug]'>): Promise<Metadata> {
   const section = findSection((await params).slug);
@@ -14,6 +12,13 @@ export async function generateMetadata({ params }: PageProps<'/[slug]'>): Promis
 export default async function SectionPage({ params }: PageProps<'/[slug]'>) {
   const section = findSection((await params).slug);
   if (!section) notFound();
+
+  const kind = collectionKindFor(section.slug);
+  if (kind) {
+    const user = await requireUser();
+    const entries = await listEntries(user.id, kind);
+    return <CollectionView section={section} entries={entries} />;
+  }
 
   const isDice = section.slug === 'dados';
 

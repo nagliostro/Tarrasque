@@ -8,7 +8,9 @@
   --accent: #e06c75;
   color-scheme: dark;
 }
-[data-theme='light'] {
+/* :root[...] vence o :root de globals.css; 90% dá contraste >= 4,5:1 do texto secundário (AA) */
+:root[data-theme='light'] {
+  --muted: color-mix(in srgb, var(--fg) 90%, var(--bg));
   --bg: #f0ebe3;
   --fg: #5a5248;
   --panel: #faf6f0;

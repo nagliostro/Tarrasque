@@ -4,16 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { DEFAULT_SLUG, NAV_GROUPS, findSection } from '../sections';
-import {
-  DEFAULT_PROFILE,
-  PROFILE_COOKIE,
-  SIDEBAR_COOKIE,
-  THEMES,
-  THEME_COOKIE,
-  initials,
-  parseTheme,
-  type ThemeName,
-} from '../theme';
+import { THEMES, initials, parseTheme, type ThemeName } from '../theme';
 import { Dialog } from './dialog';
 import { Icon } from './icon';
 import { ToastProvider, useToast } from './toast';
@@ -34,14 +25,23 @@ function useIsMobile() {
   );
 }
 
-function setCookie(name: string, value: string) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`;
+function paintTheme(name: ThemeName) {
+  document.documentElement.dataset.theme = name;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[name].bg);
+}
+
+/** Operações de servidor injetadas pela rota (o módulo shared não conhece identity). */
+export interface ShellActions {
+  savePreferences: (input: { theme?: ThemeName; sidebarCollapsed?: boolean }) => Promise<unknown>;
+  saveDisplayName: (name: string) => Promise<{ ok: boolean; name: string }>;
+  signOut: () => Promise<void>;
 }
 
 interface ShellProps {
   initialTheme: ThemeName;
   initialCollapsed: boolean;
   initialProfile: string;
+  actions: ShellActions;
   children: React.ReactNode;
 }
 
@@ -55,7 +55,7 @@ export function AppShell(props: ShellProps) {
 
 type DialogKind = 'settings' | 'profile' | null;
 
-function Shell({ initialTheme, initialCollapsed, initialProfile, children }: ShellProps) {
+function Shell({ initialTheme, initialCollapsed, initialProfile, actions, children }: ShellProps) {
   const pathname = usePathname();
   const notify = useToast();
   const mobile = useIsMobile();
@@ -91,17 +91,41 @@ function Shell({ initialTheme, initialCollapsed, initialProfile, children }: She
       setMobileOpen(!drawerOpen);
       return;
     }
-    setCollapsed((current) => {
-      setCookie(SIDEBAR_COOKIE, String(!current));
-      return !current;
+    const next = !collapsed;
+    setCollapsed(next);
+    actions.savePreferences({ sidebarCollapsed: next }).catch(() => {
+      setCollapsed(!next);
+      notify('Não foi possível salvar a preferência.');
     });
   }
 
-  function applyTheme(next: ThemeName) {
-    document.documentElement.dataset.theme = next;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[next].bg);
-    setCookie(THEME_COOKIE, next);
+  // O tema salvo na conta prevalece sobre o cookie (ex.: cookie apagado ou outro dispositivo).
+  useEffect(() => {
+    if (document.documentElement.dataset.theme !== initialTheme) paintTheme(initialTheme);
+  }, [initialTheme]);
+
+  async function applyTheme(next: ThemeName) {
+    const previous = theme;
+    paintTheme(next);
     setTheme(next);
+    try {
+      await actions.savePreferences({ theme: next });
+      notify('Configurações salvas.');
+    } catch {
+      paintTheme(previous);
+      setTheme(previous);
+      notify('Não foi possível salvar as configurações.');
+    }
+  }
+
+  async function applyProfile(name: string) {
+    try {
+      const result = await actions.saveDisplayName(name);
+      setProfile(result.name);
+      notify('Perfil atualizado.');
+    } catch {
+      notify('Não foi possível atualizar o perfil.');
+    }
   }
 
   return (
@@ -220,9 +244,8 @@ function Shell({ initialTheme, initialCollapsed, initialProfile, children }: She
         title="Configurações"
         onClose={() => setDialog(null)}
         onSubmit={(data) => {
-          applyTheme(parseTheme(String(data.get('theme'))));
+          void applyTheme(parseTheme(String(data.get('theme'))));
           setDialog(null);
-          notify('Configurações salvas.');
         }}
       >
         <label>
@@ -242,12 +265,14 @@ function Shell({ initialTheme, initialCollapsed, initialProfile, children }: She
         title="Seu perfil"
         onClose={() => setDialog(null)}
         onSubmit={(data) => {
-          const name = String(data.get('name')).trim().slice(0, 32) || DEFAULT_PROFILE;
-          setCookie(PROFILE_COOKIE, name);
-          setProfile(name);
+          void applyProfile(String(data.get('name')));
           setDialog(null);
-          notify('Perfil atualizado.');
         }}
+        footerStart={
+          <button type="button" className="secondary danger" onClick={() => void actions.signOut()}>
+            Sair da conta
+          </button>
+        }
       >
         <label>
           Nome de exibição
