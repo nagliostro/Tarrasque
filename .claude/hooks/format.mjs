@@ -1,6 +1,7 @@
 // PostToolUse (Edit|Write): Prettier + ESLint --fix no arquivo alterado. Erros de lint voltam ao Claude (exit 2).
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { env } from './node-env.mjs';
 import path from 'node:path';
 
 const input = JSON.parse(readFileSync(0, 'utf8') || '{}');
@@ -14,7 +15,7 @@ const ignored =
 if (!file || ignored || !/\.(tsx?|mjs|css|json|md)$/.test(rel)) process.exit(0);
 
 const run = (args) =>
-  spawnSync(`pnpm exec ${args.join(' ')}`, { cwd: root, encoding: 'utf8', shell: true });
+  spawnSync(`pnpm exec ${args.join(' ')}`, { cwd: root, env, encoding: 'utf8', shell: true });
 
 run(['prettier', '--write', `"${rel}"`]);
 

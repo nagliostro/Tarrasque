@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
-import { THEMES, THEME_COOKIE, parseTheme } from '@/modules/shared';
+import { DiceRain, THEMES, THEME_COOKIE, parseTheme } from '@/modules/shared';
 import '@/styles/tailwind.css';
 import '@/styles/theme.css';
 import '@/styles/globals.css';
@@ -29,7 +29,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   return (
     <html lang="pt-BR" data-theme={theme} className={fira.variable}>
-      <body>{children}</body>
+      <body>
+        <DiceRain />
+        {children}
+      </body>
     </html>
   );
 }

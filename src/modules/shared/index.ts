@@ -1,4 +1,5 @@
 export { AppShell } from './ui/app-shell';
+export { DiceRain } from './ui/dice-rain';
 export { Sprite } from './ui/sprite';
 export { Icon } from './ui/icon';
 export { Dialog } from './ui/dialog';
