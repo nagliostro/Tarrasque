@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { CharacterView, listCharacters } from '@/modules/characters';
 import { CollectionView, collectionKindFor, listEntries } from '@/modules/collections';
 import { requireUser } from '@/modules/identity';
 import { Icon, findSection } from '@/modules/shared';
@@ -18,6 +19,12 @@ export default async function SectionPage({ params }: PageProps<'/[slug]'>) {
     const user = await requireUser();
     const entries = await listEntries(user.id, kind);
     return <CollectionView section={section} entries={entries} />;
+  }
+
+  if (section.slug === 'personagem') {
+    const user = await requireUser();
+    const characters = await listCharacters(user.id);
+    return <CharacterView section={section} characters={characters} />;
   }
 
   const isDice = section.slug === 'dados';
@@ -69,14 +76,6 @@ export default async function SectionPage({ params }: PageProps<'/[slug]'>) {
               <span className="star star-a">+</span>
               <span className="star star-b">+</span>
             </div>
-            <p className="eyebrow">A AVENTURA ESTÁ À SUA ESPERA</p>
-            <h2>Sua coleção começa aqui.</h2>
-            <p>Adicione seu primeiro registro para consultar durante a próxima sessão.</p>
-            <button className="primary">
-              <Icon name="plus" />
-              <span>{section.action}</span>
-            </button>
-            <span className="empty-foot">Coleção pessoal</span>
           </section>
         </>
       )}

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { DEFAULT_SLUG, NAV_GROUPS, findSection } from '../sections';
 import { THEMES, initials, parseTheme, type ThemeName } from '../theme';
 import { Dialog } from './dialog';
+import { MotionSwitch } from './motion-switch';
 import { Icon } from './icon';
 import { ToastProvider, useToast } from './toast';
 
@@ -224,9 +225,7 @@ function Shell({ initialTheme, initialCollapsed, initialProfile, actions, childr
           <div className="breadcrumb">
             Meu espaço <span>/</span> <strong>{section?.title ?? ''}</strong>
           </div>
-          <span className="local-status">
-            <i></i> Espaço pessoal
-          </span>
+          <MotionSwitch />
         </header>
         <main id="main">
           {children}
