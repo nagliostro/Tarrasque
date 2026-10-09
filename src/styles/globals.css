@@ -92,3 +92,4 @@ nav{min-height:0;overflow:auto;padding-bottom:16px;gap:4px}.nav-group{font-size:
 .motion-switch input:focus-visible+.track{outline:2px solid var(--accent);outline-offset:4px}
 .motion-switch:hover .track{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
 @media(max-width:768px){.motion-switch .label{display:none}}
+dialog.wide{width:min(880px,94vw)}

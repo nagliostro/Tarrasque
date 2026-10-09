@@ -30,7 +30,15 @@ export function CharacterView({ section, characters }: Props) {
       setOpen(null);
       router.refresh();
     };
-    return <SheetEditor key={open.key} id={open.id} initial={open.sheet} onBack={close} onDeleted={close} />;
+    return (
+      <SheetEditor
+        key={open.key}
+        id={open.id}
+        initial={open.sheet}
+        onBack={close}
+        onDeleted={close}
+      />
+    );
   }
 
   const needle = term.trim().toLocaleLowerCase('pt-BR');

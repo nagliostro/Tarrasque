@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog, useToast } from '@/modules/shared';
 import { deleteCharacter, saveCharacter } from '../application/actions';
-import { setPath, type Sheet } from '../domain/sheet';
+import { normalizeSheet, resolve, setPath, type Sheet } from '../domain/sheet';
 import type { SheetBinding } from './sheet-fields';
 import { DetailsPage, MainPage, SpellsPage } from './sheet-pages';
 
@@ -27,20 +27,24 @@ interface Props {
 
 export function SheetEditor({ id, initial, onBack, onDeleted }: Props) {
   const notify = useToast();
-  const [sheet, setSheet] = useState<Sheet>(initial);
+  const [sheet, setSheet] = useState<Sheet>(() => normalizeSheet(initial));
   const [tab, setTab] = useState<TabKey>('ficha');
   const [status, setStatus] = useState(id ? 'Salvo automaticamente' : 'Novo personagem');
   const [savedId, setSavedId] = useState(id);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const latest = useRef(initial);
+  const latest = useRef(sheet);
   const idRef = useRef(id);
   const dirty = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   // Salvamentos em série: o primeiro cria (e devolve o id), os seguintes atualizam.
   const chain = useRef<Promise<void>>(Promise.resolve());
-  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({ ficha: null, detalhes: null, magias: null });
+  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({
+    ficha: null,
+    detalhes: null,
+    magias: null,
+  });
   const body = useRef<HTMLDivElement>(null);
 
   const flush = useCallback((): Promise<void> => {
@@ -70,8 +74,9 @@ export function SheetEditor({ id, initial, onBack, onDeleted }: Props) {
 
   const set = useCallback(
     (path: string, value: unknown) => {
-      const next = setPath(latest.current, path, value);
-      if (next === latest.current) return;
+      // As regras do jogo corrigem a ficha na hora: escolhas que deixaram de valer somem.
+      const next = normalizeSheet(setPath(latest.current, path, value));
+      if (JSON.stringify(next) === JSON.stringify(latest.current)) return;
       latest.current = next;
       dirty.current = true;
       setSheet(next);
@@ -96,7 +101,10 @@ export function SheetEditor({ id, initial, onBack, onDeleted }: Props) {
     body.current?.querySelector('input')?.focus({ preventScroll: true });
   }, []);
 
-  const binding = useMemo<SheetBinding>(() => ({ sheet, set }), [sheet, set]);
+  const binding = useMemo<SheetBinding>(
+    () => ({ sheet, set, build: resolve(sheet) }),
+    [sheet, set],
+  );
 
   function onTabKey(e: React.KeyboardEvent) {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
@@ -134,7 +142,12 @@ export function SheetEditor({ id, initial, onBack, onDeleted }: Props) {
           </svg>
           Meus personagens
         </button>
-        <div className="sheet-tabs" role="tablist" aria-label="Páginas da ficha" onKeyDown={onTabKey}>
+        <div
+          className="sheet-tabs"
+          role="tablist"
+          aria-label="Páginas da ficha"
+          onKeyDown={onTabKey}
+        >
           {TABS.map(([key, label]) => (
             <button
               key={key}
@@ -182,4 +195,3 @@ export function SheetEditor({ id, initial, onBack, onDeleted }: Props) {
     </section>
   );
 }
-

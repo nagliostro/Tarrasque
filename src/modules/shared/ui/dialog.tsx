@@ -19,6 +19,8 @@ interface DialogProps {
   keepMounted?: boolean;
   /** Ação extra alinhada à esquerda do rodapé (ex.: "Excluir"). */
   footerStart?: React.ReactNode;
+  /** Diálogo largo (paisagem), para conteúdo como a mesa de dados. */
+  wide?: boolean;
 }
 
 /** <dialog> nativo com showModal, no mesmo markup do legado. */
@@ -33,6 +35,7 @@ export function Dialog({
   pending = false,
   footerStart,
   keepMounted = false,
+  wide = false,
 }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -45,7 +48,12 @@ export function Dialog({
   }, [open]);
 
   return (
-    <dialog ref={ref} onClose={onClose} aria-labelledby={titleId}>
+    <dialog
+      ref={ref}
+      className={wide ? 'wide' : undefined}
+      onClose={onClose}
+      aria-labelledby={titleId}
+    >
       {(open || keepMounted) && (
         <form
           onSubmit={(event) => {

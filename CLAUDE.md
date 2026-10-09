@@ -38,16 +38,21 @@ Copie `.env.example` para `.env` e troque `BETTER_AUTH_SECRET` (32+ caracteres).
 
 ## Ambiente Claude (`.claude/`)
 
-- Agents: `module-builder` (um por módulo, em worktrees), `prisma-db` (único dono de `prisma/`), `ui-fidelity`, `test-writer`, `reviewer`.
-- Skills: `new-module`, `new-collection`, `port-legacy-screen`, `db-migrate`.
+- Agents: `module-builder` (um por módulo, em worktrees), `prisma-db` (único dono de `prisma/`), `ui-fidelity`, `test-writer`, `reviewer`. Regras de D&D 5e (somente leitura): `regras-jogador` (PHB), `regras-mestre` (DMG), `regras-monstros` (MM), `auditor-regras-dnd` (transversal).
+- Skills: `new-module`, `new-collection`, `port-legacy-screen`, `db-migrate`, `dnd5e-reference` (tabelas dos três livros, edição 2014), `audit-dnd-rules` (roda os 4 agentes de regras em paralelo e consolida).
 - Hooks (`settings.json`): `guard` (bloqueia `.env*`, migrations aplicadas, `migrate reset`/`db push --force`), `format` (Prettier + ESLint por arquivo editado), `check` (typecheck + testes no Stop), `session-start`.
+
+## Regras da ficha (D&D 5e, edição 2014)
+
+- A ficha guarda só *escolhas* (classe, raça, valores-base, perícias, armas...). `resolve(sheet)` em `characters/domain/rules/build.ts` valida, aplica regras (raça, classe, antecedente, magia) e calcula PV, CA, bônus e espaços. `normalizeSheet` roda no cliente a cada edição e de novo em `saveCharacter` (o servidor não confia no cliente).
+- Dados de regra ficam em `domain/rules/` (`classes`, `lineage`, `equipment`, `magic`); mude lá, com teste que afirme o valor do livro. Fora do escopo por ora: multiclasse, talentos, Humano Variante, lista de magias por nome, rolagem de atributos.
 
 ## Armadilhas conhecidas
 
 - A porta 5432 do host pode estar ocupada por um Postgres nativo do Windows; o compose usa **5434** de propósito.
 - `prisma migrate dev` no Prisma 7 não regenera o cliente: rode `pnpm exec prisma generate` depois.
 - Testes E2E criam usuários `*@e2e.test` no banco de desenvolvimento; `e2e/global-teardown.ts` os remove. Cada teste usa um `x-forwarded-for` próprio para o rate limit não interferir entre testes.
-- Rótulos de formulário que envolvem `<select>` têm nome acessível longo; nos testes use `select[name=...]`.
+- `SelectField` já põe `aria-label` e `name` no `<select>`; para outros `<select>` dentro de `<label>`, o nome acessível fica longo (use `select[name=...]`).
 - Mantenha `typescript` em 6.x: o typescript-eslint ainda não suporta TS 7.
 - Prisma 7 declara suporte a Node até 24; funciona no Node 26 local (verificado), mas atenção em CI.
 - Escreva arquivos JSON/config sem BOM (um `package.json` com BOM quebra o build).

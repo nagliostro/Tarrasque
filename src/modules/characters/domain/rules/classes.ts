@@ -1,0 +1,360 @@
+import { ALL_SKILLS, skills, type AbilityKey, type Named } from './core';
+
+export type ArmorCategory = 'leve' | 'media' | 'pesada' | 'escudo';
+export type CasterKind = 'full' | 'half' | 'third' | 'pact';
+
+export interface SubclassDef extends Named {
+  /** Subclasses que conjuram por conta própria (Cavaleiro Místico, Trapaceiro Arcano). */
+  caster?: { kind: CasterKind; ability: AbilityKey };
+}
+
+export interface ClassDef extends Named {
+  hitDie: 6 | 8 | 10 | 12;
+  saves: readonly [AbilityKey, AbilityKey];
+  skillCount: number;
+  skills: readonly number[];
+  armor: readonly ArmorCategory[];
+  /** `simples`, `marcial` ou ids de armas específicas. */
+  weapons: readonly string[];
+  caster?: { kind: CasterKind; ability: AbilityKey; from: number };
+  subclassLevel: number;
+  subclassLabel: string;
+  subclasses: readonly SubclassDef[];
+  /** Níveis extras de Aumento de Atributo (além de 4, 8, 12, 16 e 19). */
+  extraAsiLevels: readonly number[];
+  /** Níveis em que a classe concede 2 especializações. */
+  expertise: readonly number[];
+  fightingStyle?: { from: number; options: readonly string[] };
+  unarmored?: 'con' | 'sab';
+}
+
+export const FIGHTING_STYLES: readonly Named[] = [
+  { id: 'arquearia', name: 'Arquearia' },
+  { id: 'defesa', name: 'Defesa' },
+  { id: 'duelismo', name: 'Duelismo' },
+  { id: 'armas-grandes', name: 'Combate com Armas Grandes' },
+  { id: 'protecao', name: 'Proteção' },
+  { id: 'duas-armas', name: 'Combate com Duas Armas' },
+];
+
+const sub = (id: string, name: string): SubclassDef => ({ id, name });
+const WIZARD_WEAPONS = ['adaga', 'dardo', 'funda', 'bordao', 'besta-leve'];
+const ROGUE_WEAPONS = ['simples', 'besta-de-mao', 'espada-longa', 'rapieira', 'espada-curta'];
+
+export const CLASSES: readonly ClassDef[] = [
+  {
+    id: 'barbaro',
+    name: 'Bárbaro',
+    hitDie: 12,
+    saves: ['for', 'con'],
+    skillCount: 2,
+    skills: skills(
+      'Adestrar Animais',
+      'Atletismo',
+      'Intimidação',
+      'Natureza',
+      'Percepção',
+      'Sobrevivência',
+    ),
+    armor: ['leve', 'media', 'escudo'],
+    weapons: ['simples', 'marcial'],
+    subclassLevel: 3,
+    subclassLabel: 'o Caminho Primitivo',
+    subclasses: [
+      sub('berserker', 'Caminho do Berserker'),
+      sub('totemico', 'Caminho do Guerreiro Totêmico'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+    unarmored: 'con',
+  },
+  {
+    id: 'bardo',
+    name: 'Bardo',
+    hitDie: 8,
+    saves: ['des', 'car'],
+    skillCount: 3,
+    skills: ALL_SKILLS,
+    armor: ['leve'],
+    weapons: ROGUE_WEAPONS,
+    caster: { kind: 'full', ability: 'car', from: 1 },
+    subclassLevel: 3,
+    subclassLabel: 'o Colégio de Bardo',
+    subclasses: [
+      sub('conhecimento', 'Colégio do Conhecimento'),
+      sub('bravura', 'Colégio da Bravura'),
+    ],
+    extraAsiLevels: [],
+    expertise: [3, 10],
+  },
+  {
+    id: 'bruxo',
+    name: 'Bruxo',
+    hitDie: 8,
+    saves: ['sab', 'car'],
+    skillCount: 2,
+    skills: skills(
+      'Arcanismo',
+      'Enganação',
+      'História',
+      'Intimidação',
+      'Investigação',
+      'Natureza',
+      'Religião',
+    ),
+    armor: ['leve'],
+    weapons: ['simples'],
+    caster: { kind: 'pact', ability: 'car', from: 1 },
+    subclassLevel: 1,
+    subclassLabel: 'o Patrono Transcendental',
+    subclasses: [
+      sub('arquifada', 'A Arquifada'),
+      sub('infero', 'O Ínfero'),
+      sub('grande-antigo', 'O Grande Antigo'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+  },
+  {
+    id: 'clerigo',
+    name: 'Clérigo',
+    hitDie: 8,
+    saves: ['sab', 'car'],
+    skillCount: 2,
+    skills: skills('História', 'Intuição', 'Medicina', 'Persuasão', 'Religião'),
+    armor: ['leve', 'media', 'escudo'],
+    weapons: ['simples'],
+    caster: { kind: 'full', ability: 'sab', from: 1 },
+    subclassLevel: 1,
+    subclassLabel: 'o Domínio Divino',
+    subclasses: [
+      sub('conhecimento', 'Domínio do Conhecimento'),
+      sub('vida', 'Domínio da Vida'),
+      sub('luz', 'Domínio da Luz'),
+      sub('natureza', 'Domínio da Natureza'),
+      sub('tempestade', 'Domínio da Tempestade'),
+      sub('enganacao', 'Domínio da Enganação'),
+      sub('guerra', 'Domínio da Guerra'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+  },
+  {
+    id: 'druida',
+    name: 'Druida',
+    hitDie: 8,
+    saves: ['int', 'sab'],
+    skillCount: 2,
+    skills: skills(
+      'Arcanismo',
+      'Adestrar Animais',
+      'Intuição',
+      'Medicina',
+      'Natureza',
+      'Percepção',
+      'Religião',
+      'Sobrevivência',
+    ),
+    armor: ['leve', 'media', 'escudo'],
+    weapons: [
+      'clava',
+      'adaga',
+      'dardo',
+      'azagaia',
+      'maca',
+      'bordao',
+      'cimitarra',
+      'foice-curta',
+      'funda',
+      'lanca',
+    ],
+    caster: { kind: 'full', ability: 'sab', from: 1 },
+    subclassLevel: 2,
+    subclassLabel: 'o Círculo Druídico',
+    subclasses: [sub('terra', 'Círculo da Terra'), sub('lua', 'Círculo da Lua')],
+    extraAsiLevels: [],
+    expertise: [],
+  },
+  {
+    id: 'feiticeiro',
+    name: 'Feiticeiro',
+    hitDie: 6,
+    saves: ['con', 'car'],
+    skillCount: 2,
+    skills: skills('Arcanismo', 'Enganação', 'Intimidação', 'Intuição', 'Persuasão', 'Religião'),
+    armor: [],
+    weapons: WIZARD_WEAPONS,
+    caster: { kind: 'full', ability: 'car', from: 1 },
+    subclassLevel: 1,
+    subclassLabel: 'a Origem de Feitiçaria',
+    subclasses: [
+      sub('linhagem-draconica', 'Linhagem Dracônica'),
+      sub('magia-selvagem', 'Magia Selvagem'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+  },
+  {
+    id: 'guerreiro',
+    name: 'Guerreiro',
+    hitDie: 10,
+    saves: ['for', 'con'],
+    skillCount: 2,
+    skills: skills(
+      'Acrobacia',
+      'Adestrar Animais',
+      'Atletismo',
+      'História',
+      'Intimidação',
+      'Intuição',
+      'Percepção',
+      'Sobrevivência',
+    ),
+    armor: ['leve', 'media', 'pesada', 'escudo'],
+    weapons: ['simples', 'marcial'],
+    subclassLevel: 3,
+    subclassLabel: 'o Arquétipo Marcial',
+    subclasses: [
+      sub('campeao', 'Campeão'),
+      sub('mestre-da-batalha', 'Mestre da Batalha'),
+      {
+        id: 'cavaleiro-mistico',
+        name: 'Cavaleiro Místico',
+        caster: { kind: 'third', ability: 'int' },
+      },
+    ],
+    extraAsiLevels: [6, 14],
+    expertise: [],
+    fightingStyle: {
+      from: 1,
+      options: ['arquearia', 'defesa', 'duelismo', 'armas-grandes', 'protecao', 'duas-armas'],
+    },
+  },
+  {
+    id: 'ladino',
+    name: 'Ladino',
+    hitDie: 8,
+    saves: ['des', 'int'],
+    skillCount: 4,
+    skills: skills(
+      'Acrobacia',
+      'Atletismo',
+      'Atuação',
+      'Enganação',
+      'Furtividade',
+      'Intimidação',
+      'Intuição',
+      'Investigação',
+      'Percepção',
+      'Persuasão',
+      'Prestidigitação',
+    ),
+    armor: ['leve'],
+    weapons: ROGUE_WEAPONS,
+    subclassLevel: 3,
+    subclassLabel: 'o Arquétipo de Ladino',
+    subclasses: [
+      sub('ladrao', 'Ladrão'),
+      sub('assassino', 'Assassino'),
+      {
+        id: 'trapaceiro-arcano',
+        name: 'Trapaceiro Arcano',
+        caster: { kind: 'third', ability: 'int' },
+      },
+    ],
+    extraAsiLevels: [10],
+    expertise: [1, 6],
+  },
+  {
+    id: 'mago',
+    name: 'Mago',
+    hitDie: 6,
+    saves: ['int', 'sab'],
+    skillCount: 2,
+    skills: skills('Arcanismo', 'História', 'Intuição', 'Investigação', 'Medicina', 'Religião'),
+    armor: [],
+    weapons: WIZARD_WEAPONS,
+    caster: { kind: 'full', ability: 'int', from: 1 },
+    subclassLevel: 2,
+    subclassLabel: 'a Tradição Arcana',
+    subclasses: [
+      sub('abjuracao', 'Escola de Abjuração'),
+      sub('conjuracao', 'Escola de Conjuração'),
+      sub('adivinhacao', 'Escola de Adivinhação'),
+      sub('encantamento', 'Escola de Encantamento'),
+      sub('evocacao', 'Escola de Evocação'),
+      sub('ilusao', 'Escola de Ilusão'),
+      sub('necromancia', 'Escola de Necromancia'),
+      sub('transmutacao', 'Escola de Transmutação'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+  },
+  {
+    id: 'monge',
+    name: 'Monge',
+    hitDie: 8,
+    saves: ['for', 'des'],
+    skillCount: 2,
+    skills: skills('Acrobacia', 'Atletismo', 'Furtividade', 'História', 'Intuição', 'Religião'),
+    armor: [],
+    weapons: ['simples', 'espada-curta'],
+    subclassLevel: 3,
+    subclassLabel: 'a Tradição Monástica',
+    subclasses: [
+      sub('mao-aberta', 'Caminho da Mão Aberta'),
+      sub('sombra', 'Caminho da Sombra'),
+      sub('quatro-elementos', 'Caminho dos Quatro Elementos'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+    unarmored: 'sab',
+  },
+  {
+    id: 'paladino',
+    name: 'Paladino',
+    hitDie: 10,
+    saves: ['sab', 'car'],
+    skillCount: 2,
+    skills: skills('Atletismo', 'Intimidação', 'Intuição', 'Medicina', 'Persuasão', 'Religião'),
+    armor: ['leve', 'media', 'pesada', 'escudo'],
+    weapons: ['simples', 'marcial'],
+    caster: { kind: 'half', ability: 'car', from: 2 },
+    subclassLevel: 3,
+    subclassLabel: 'o Juramento Sagrado',
+    subclasses: [
+      sub('devocao', 'Juramento de Devoção'),
+      sub('ancioes', 'Juramento dos Anciões'),
+      sub('vinganca', 'Juramento de Vingança'),
+    ],
+    extraAsiLevels: [],
+    expertise: [],
+    fightingStyle: { from: 2, options: ['defesa', 'duelismo', 'armas-grandes', 'protecao'] },
+  },
+  {
+    id: 'patrulheiro',
+    name: 'Patrulheiro',
+    hitDie: 10,
+    saves: ['for', 'des'],
+    skillCount: 3,
+    skills: skills(
+      'Adestrar Animais',
+      'Atletismo',
+      'Furtividade',
+      'Intuição',
+      'Investigação',
+      'Natureza',
+      'Percepção',
+      'Sobrevivência',
+    ),
+    armor: ['leve', 'media', 'escudo'],
+    weapons: ['simples', 'marcial'],
+    caster: { kind: 'half', ability: 'sab', from: 2 },
+    subclassLevel: 3,
+    subclassLabel: 'o Arquétipo de Patrulheiro',
+    subclasses: [sub('cacador', 'Caçador'), sub('senhor-das-feras', 'Senhor das Feras')],
+    extraAsiLevels: [],
+    expertise: [],
+    fightingStyle: { from: 2, options: ['arquearia', 'defesa', 'duelismo', 'duas-armas'] },
+  },
+];

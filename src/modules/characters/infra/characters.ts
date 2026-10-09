@@ -15,7 +15,9 @@ export async function listCharacters(userId: string): Promise<CharacterSummary[]
 export async function readSheet(userId: string, id: string): Promise<Sheet | null> {
   const row = await prisma.character.findFirst({ where: { id, userId }, select: { sheet: true } });
   const sheet = row?.sheet;
-  return sheet !== null && typeof sheet === 'object' && !Array.isArray(sheet) ? (sheet as Sheet) : null;
+  return sheet !== null && typeof sheet === 'object' && !Array.isArray(sheet)
+    ? (sheet as Sheet)
+    : null;
 }
 
 export const countCharacters = (userId: string) => prisma.character.count({ where: { userId } });

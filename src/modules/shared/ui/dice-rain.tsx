@@ -1,10 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
-import {
-  readBackgroundAnimation,
-  subscribeBackgroundAnimation,
-} from '../motion';
+import { readBackgroundAnimation, subscribeBackgroundAnimation } from '../motion';
 import { DICE, type Vec3, type Wireframe } from '../dice-geometry';
 
 interface Die {
@@ -87,7 +84,11 @@ function draw(ctx: CanvasRenderingContext2D, die: Die) {
 
 /** Fundo decorativo: dados em arame (sem preenchimento) caindo e girando em 3D. */
 export function DiceRain() {
-  const enabled = useSyncExternalStore(subscribeBackgroundAnimation, readBackgroundAnimation, () => true);
+  const enabled = useSyncExternalStore(
+    subscribeBackgroundAnimation,
+    readBackgroundAnimation,
+    () => true,
+  );
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

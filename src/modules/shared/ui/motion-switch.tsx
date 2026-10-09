@@ -9,7 +9,11 @@ import {
 
 /** Slider (interruptor) que liga/desliga a animação de dados do fundo. */
 export function MotionSwitch() {
-  const on = useSyncExternalStore(subscribeBackgroundAnimation, readBackgroundAnimation, () => true);
+  const on = useSyncExternalStore(
+    subscribeBackgroundAnimation,
+    readBackgroundAnimation,
+    () => true,
+  );
   return (
     <label className="motion-switch">
       <span className="label">Animação de fundo</span>

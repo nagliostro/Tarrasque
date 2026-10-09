@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CharacterView, listCharacters } from '@/modules/characters';
 import { CollectionView, collectionKindFor, listEntries } from '@/modules/collections';
+import { DiceView, listRolls } from '@/modules/dice';
 import { requireUser } from '@/modules/identity';
 import { Icon, findSection } from '@/modules/shared';
 
@@ -27,7 +28,11 @@ export default async function SectionPage({ params }: PageProps<'/[slug]'>) {
     return <CharacterView section={section} characters={characters} />;
   }
 
-  const isDice = section.slug === 'dados';
+  if (section.slug === 'dados') {
+    const user = await requireUser();
+    const rolls = await listRolls(user.id);
+    return <DiceView section={section} initialRolls={rolls} />;
+  }
 
   return (
     <>
@@ -40,45 +45,29 @@ export default async function SectionPage({ params }: PageProps<'/[slug]'>) {
           </h1>
           {section.description && <p className="subtitle">{section.description}</p>}
         </div>
-        {!isDice && (
-          <button className="primary">
-            <Icon name="plus" />
-            <span>{section.action}</span>
-          </button>
-        )}
+        <button className="primary">
+          <Icon name="plus" />
+          <span>{section.action}</span>
+        </button>
       </div>
-
-      {isDice ? (
-        <section className="empty">
-          <div className="emblem">
-            <div className="orbit" />
-            <Icon name="dice" />
-          </div>
-          <p className="eyebrow">MESA DE DADOS</p>
-          <h2>A mesa está sendo preparada.</h2>
-        </section>
-      ) : (
-        <>
-          <div className="section-line">
-            <span>
-              {section.list} <b>0</b>
-            </span>
-            <span className="section-caption">SUAS HISTÓRIAS COMEÇAM AQUI</span>
-          </div>
-          <label className="search-field">
-            Buscar nesta coleção
-            <input type="search" placeholder="Buscar por nome ou descrição" />
-          </label>
-          <section className="empty">
-            <div className="emblem">
-              <div className="orbit" />
-              <Icon name="dice" />
-              <span className="star star-a">+</span>
-              <span className="star star-b">+</span>
-            </div>
-          </section>
-        </>
-      )}
+      <div className="section-line">
+        <span>
+          {section.list} <b>0</b>
+        </span>
+        <span className="section-caption">SUAS HISTÓRIAS COMEÇAM AQUI</span>
+      </div>
+      <label className="search-field">
+        Buscar nesta coleção
+        <input type="search" placeholder="Buscar por nome ou descrição" />
+      </label>
+      <section className="empty">
+        <div className="emblem">
+          <div className="orbit" />
+          <Icon name="dice" />
+          <span className="star star-a">+</span>
+          <span className="star star-b">+</span>
+        </div>
+      </section>
     </>
   );
 }

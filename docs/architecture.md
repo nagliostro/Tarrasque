@@ -52,7 +52,7 @@ legacy/dist/      app estático original (referência)
 1. Fundação ✅: projeto, casca visual idêntica, schema, qualidade, `.claude/`.
 2. Identity + collections ✅: login e cadastro por e-mail e senha (Better Auth, sessão no Postgres), preferências e perfil no `User`, CRUD das 6 coleções com busca, edição e exclusão. Login social (Google) ficou para depois.
 3. Characters.
-4. Dice.
+4. Dice ✅: rolador com grupos de dados, modificador, críticos de d20 natural e histórico persistido.
 5. Polimento (inclui checklist de deploy: `BETTER_AUTH_URL` em `https://` para o cookie de sessão sair com `Secure`; `trustedOrigins` e `experimental.serverActions.allowedOrigins` se houver domínios de preview/proxy; confirmar que o proxy sobrescreve `x-forwarded-for`, pois o rate limit depende dele; login social com Google): importador de `localStorage` (chaves `tarrasque-*`; `theme` sem JSON; `rolls` legado sem `dice`), regressão visual (390/820/1440 × 4 temas), a11y, deploy (sugestão: Vercel + Neon).
 
 ## Trabalho em paralelo
