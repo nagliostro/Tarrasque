@@ -21,6 +21,8 @@ interface DialogProps {
   footerStart?: React.ReactNode;
   /** Diálogo largo (paisagem), para conteúdo como a mesa de dados. */
   wide?: boolean;
+  /** Só leitura: o rodapé tem apenas "Fechar" e não há envio. */
+  readOnly?: boolean;
 }
 
 /** <dialog> nativo com showModal, no mesmo markup do legado. */
@@ -36,6 +38,7 @@ export function Dialog({
   footerStart,
   keepMounted = false,
   wide = false,
+  readOnly = false,
 }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -70,16 +73,18 @@ export function Dialog({
           {children}
           <div className="dialog-actions">
             {footerStart && <span style={{ marginRight: 'auto' }}>{footerStart}</span>}
-            <button type="button" className="secondary" onClick={onClose}>
-              Cancelar
+            <button type="button" className={readOnly ? 'primary' : 'secondary'} onClick={onClose}>
+              {readOnly ? 'Fechar' : 'Cancelar'}
             </button>
-            <button
-              type="submit"
-              className={danger ? 'secondary danger' : 'primary'}
-              disabled={pending}
-            >
-              {submitLabel}
-            </button>
+            {!readOnly && (
+              <button
+                type="submit"
+                className={danger ? 'secondary danger' : 'primary'}
+                disabled={pending}
+              >
+                {submitLabel}
+              </button>
+            )}
           </div>
         </form>
       )}

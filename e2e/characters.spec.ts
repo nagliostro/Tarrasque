@@ -33,6 +33,27 @@ test('criar, calcular, salvar automaticamente, reabrir e excluir uma ficha', asy
   await expect(page.getByLabel('CD de resistência')).toHaveText('14');
   await expect(page.getByLabel('Espaços totais do círculo 3')).toHaveText('2');
 
+  // escolhe uma magia do Livro do Jogador no seletor e abre os detalhes no modal
+  await page.getByLabel('Magia 1 de círculo 1').selectOption('Mísseis Mágicos');
+  await page.getByRole('button', { name: 'Detalhes de Mísseis Mágicos' }).click();
+  const info = page.getByRole('dialog', { name: 'Mísseis Mágicos' });
+  await expect(info).toContainText('1º círculo de evocação');
+  await expect(info).toContainText('36 metros');
+  await info.getByRole('button', { name: 'Fechar', exact: true }).last().click();
+  await expect(info).toBeHidden();
+  // conjurar exige magia preparada e gasta um espaço; o descanso longo devolve
+  const cast = page.getByRole('button', { name: 'Conjurar' }).first();
+  await expect(cast).toBeDisabled();
+  await page.getByLabel('Preparada').first().check();
+  await cast.click();
+  await expect(page.getByLabel('Espaços gastos do círculo 1')).toHaveText('1');
+  await page.getByRole('button', { name: 'Descanso longo' }).click();
+  await expect(page.getByLabel('Espaços gastos do círculo 1')).toHaveText('0');
+  // o Mago não tem Curar Ferimentos na lista
+  await expect(
+    page.getByLabel('Magia 1 de círculo 1').locator('option', { hasText: 'Curar Ferimentos' }),
+  ).toHaveCount(0);
+
   await page.getByRole('button', { name: 'Meus personagens' }).click();
   await expect(page.locator('article.card h2')).toHaveText('Elara');
   await expect(page.locator('article.card p')).toContainText('Humano · Mago 5');

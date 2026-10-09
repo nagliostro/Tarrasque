@@ -46,6 +46,9 @@ export function Sprite() {
         <symbol id="close-icon" viewBox="0 0 24 24">
           <path d="m6 6 12 12M6 18 18 6" />
         </symbol>
+        <symbol id="wand" viewBox="0 0 24 24">
+          <path d="M3 19 15 7l2 2L5 21Zm9-9 2 2M19.500 2l.9 2.100 2.100.9-2.100.9-.9 2.100-.9-2.100-2.100-.9 2.100-.9ZM20 15v4m-2-2h4M7 3v3m-1.500-1.500h3" />
+        </symbol>
         <symbol id="arrow" viewBox="0 0 24 24">
           <path d="M5 12h14m-5-5 5 5-5 5" />
         </symbol>

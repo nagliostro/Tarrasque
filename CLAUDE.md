@@ -45,7 +45,7 @@ Copie `.env.example` para `.env` e troque `BETTER_AUTH_SECRET` (32+ caracteres).
 ## Regras da ficha (D&D 5e, edição 2014)
 
 - A ficha guarda só *escolhas* (classe, raça, valores-base, perícias, armas...). `resolve(sheet)` em `characters/domain/rules/build.ts` valida, aplica regras (raça, classe, antecedente, magia) e calcula PV, CA, bônus e espaços. `normalizeSheet` roda no cliente a cada edição e de novo em `saveCharacter` (o servidor não confia no cliente).
-- Dados de regra ficam em `domain/rules/` (`classes`, `lineage`, `equipment`, `magic`); mude lá, com teste que afirme o valor do livro. Fora do escopo por ora: multiclasse, talentos, Humano Variante, lista de magias por nome, rolagem de atributos.
+- Dados de regra ficam em `domain/rules/` (`classes`, `lineage`, `equipment`, `magic`); mude lá, com teste que afirme o valor do livro. Magias: o catálogo do Livro do Jogador (359, resumos próprios em pt-BR) fica em `domain/rules/spells/` (um arquivo por círculo); a aba Magias escolhe por seletor filtrado pela lista da classe (`SpellBuild.list`) e abre os detalhes em modal. A ficha guarda só o nome. Fora do escopo por ora: multiclasse, talentos, Humano Variante, rolagem de atributos.
 
 ## Armadilhas conhecidas
 

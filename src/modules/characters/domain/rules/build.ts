@@ -35,6 +35,7 @@ import {
 } from './lineage';
 import { classicTotal, readClassicAssignment, readClassicRolls, type ClassicRoll } from './classic';
 import { bonusPrepared, cantripsKnown, spellSlots, spellsKnown } from './magic';
+import { spellListOf, type SpellClass } from './spells';
 
 export const STANDARD_ARRAY: readonly number[] = [15, 14, 13, 12, 10, 8];
 export const POINT_BUY_BUDGET = 27;
@@ -81,6 +82,8 @@ export interface AttackRow {
 
 export interface SpellBuild {
   className: string;
+  /** Lista de magias da classe (ou da subclasse conjuradora); sem ela, vale qualquer magia. */
+  list: SpellClass | undefined;
   ability: AbilityKey;
   mode: 'known' | 'prepared' | 'book';
   dc: number;
@@ -514,6 +517,7 @@ export function resolve(raw: Sheet): Build {
     const noSlots = Object.keys(slots).length === 0;
     return {
       className: cls.name,
+      list: spellListOf(casterId),
       ability,
       mode,
       dc: 8 + pb + mod(ability),

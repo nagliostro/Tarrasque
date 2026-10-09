@@ -106,3 +106,15 @@ span.prof{cursor:default}
 @keyframes classic-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.classic-row{animation:none}}
 .sheet .classic-open{margin-bottom:24px}
+/* Magias: seletor por linha, botão de detalhes e conteúdo do modal. */
+.spell-lines select{flex:1;min-width:0;min-height:36px;padding:4px 8px;font-size:12px}
+.spell-info-button{flex:none;width:30px;height:30px;font-size:12px;border-radius:50%}
+.spell-info-button:disabled{opacity:.35;cursor:default}
+.spell-info dl{display:grid;gap:8px;margin:12px 0}
+.spell-info dl div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px}
+.spell-info dt{color:var(--muted);font-size:11px}
+.spell-info dd{margin:0}
+@media(max-width:768px){.spell-info dl div{grid-template-columns:minmax(0,1fr);gap:2px}}
+.spell-rest{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.spell-cast{display:flex;gap:12px;align-items:end;margin-top:16px}
+.spell-cast .sf{flex:1}

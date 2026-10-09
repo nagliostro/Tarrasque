@@ -17,8 +17,11 @@ import {
   SKILLS,
   SPELL_LINES,
   STANDARD_ARRAY,
+  SPELLS,
   WEAPONS,
   ABILITY_CAP,
+  findSpell,
+  spellsFor,
   formatBonus,
   getPath,
   levelForXp,
@@ -26,8 +29,11 @@ import {
   classicTotal,
   toNumber,
   type Named,
+  type Spell,
 } from '../domain/sheet';
 import { ClassicDialog } from './sheet-classic';
+import { Icon } from '@/modules/shared';
+import { SpellDialog } from './spell-dialog';
 import {
   Area,
   Check,
@@ -754,16 +760,16 @@ export function MainPage({ b }: { b: SheetBinding }) {
         </div>
       </div>
       <div className="sh-notes">
-        <section className="box">
+        <section className="box grow">
           <Area b={b} label="Traços de personalidade" path="pt" rows={4} />
         </section>
-        <section className="box">
+        <section className="box grow">
           <Area b={b} label="Ideais" path="id" rows={4} />
         </section>
-        <section className="box">
+        <section className="box grow">
           <Area b={b} label="Vínculos" path="vn" rows={4} />
         </section>
-        <section className="box">
+        <section className="box grow">
           <Area b={b} label="Defeitos" path="df" rows={4} />
         </section>
       </div>
@@ -796,7 +802,7 @@ export function DetailsPage({ b }: { b: SheetBinding }) {
           <section className="box">
             <Area b={b} label="Aparência do personagem" path="app" rows={10} />
           </section>
-          <section className="box">
+          <section className="box grow">
             <Area b={b} label="História do personagem" path="bio" rows={20} />
           </section>
         </div>
@@ -808,7 +814,7 @@ export function DetailsPage({ b }: { b: SheetBinding }) {
           <section className="box">
             <Area b={b} label="Características e traços adicionais" path="aft" rows={12} />
           </section>
-          <section className="box">
+          <section className="box grow">
             <Area b={b} label="Tesouro" path="tre" rows={9} />
           </section>
         </div>
@@ -816,6 +822,21 @@ export function DetailsPage({ b }: { b: SheetBinding }) {
     </>
   );
 }
+
+/** Espaços já gastos no círculo (0 se vazio). */
+const spentAt = (b: SheetBinding, circle: number) =>
+  Number(getPath(b.sheet, `sl.${circle}.e`)) || 0;
+
+/** Círculos a partir de `from` que ainda têm espaço, com quantos restam. */
+function castOptions(b: SheetBinding, from: number) {
+  const slots = b.build.spell?.slots ?? {};
+  return Object.entries(slots)
+    .map(([c, total]) => ({ circle: Number(c), left: total - spentAt(b, Number(c)) }))
+    .filter((o) => o.circle >= from && o.left > 0)
+    .sort((x, y) => x.circle - y.circle);
+}
+
+const castAt = (b: SheetBinding, circle: number) => b.set(`sl.${circle}.e`, spentAt(b, circle) + 1);
 
 function SpellLines({
   b,
@@ -832,34 +853,97 @@ function SpellLines({
   const spell = b.build.spell!;
   const book = spell.mode === 'book' && circle > 0;
   const preparedFull = book && countPrepared(b) >= spell.preparedLimit;
+  const [shown, setShown] = useState<Spell | null>(null);
+  const pool = spell.list
+    ? spellsFor(spell.list, circle)
+    : SPELLS.filter((s) => s.circle === circle);
+  const names = Array.from({ length: count }, (_, i) =>
+    asText(getPath(b.sheet, `sp.${circle}.${i}.n`)),
+  );
   return (
-    <ul className="spell-lines">
-      {Array.from({ length: count }, (_, i) => {
-        const name = asText(getPath(b.sheet, `sp.${circle}.${i}.n`));
-        const prepared = getPath(b.sheet, `sp.${circle}.${i}.p`) === true;
-        return (
-          <li key={i}>
-            {book && (
-              <input
-                type="checkbox"
-                aria-label="Preparada"
-                checked={prepared}
-                disabled={name === '' || (!prepared && preparedFull)}
-                onChange={(e) => b.set(`sp.${circle}.${i}.p`, e.target.checked)}
-              />
-            )}
-            <input
-              type="text"
-              maxLength={60}
-              aria-label={`Magia ${i + 1} de ${circle ? 'círculo ' + circle : 'truque'}`}
-              disabled={name === '' && full}
-              value={name}
-              onChange={(e) => b.set(`sp.${circle}.${i}.n`, e.target.value)}
-            />
-          </li>
-        );
-      })}
-    </ul>
+    <>
+      <ul className="spell-lines">
+        {names.map((name, i) => {
+          const prepared = getPath(b.sheet, `sp.${circle}.${i}.p`) === true;
+          const known = findSpell(name);
+          const label = `Magia ${i + 1} de ${circle ? 'círculo ' + circle : 'truque'}`;
+          return (
+            <li key={i}>
+              {book && (
+                <input
+                  type="checkbox"
+                  aria-label="Preparada"
+                  checked={prepared}
+                  disabled={name === '' || (!prepared && preparedFull)}
+                  onChange={(e) => b.set(`sp.${circle}.${i}.p`, e.target.checked)}
+                />
+              )}
+              <select
+                aria-label={label}
+                name={`sp.${circle}.${i}.n`}
+                disabled={name === '' && full}
+                value={name}
+                onChange={(e) => b.set(`sp.${circle}.${i}.n`, e.target.value)}
+              >
+                <option value="">—</option>
+                {name !== '' && !known && <option value={name}>{name}</option>}
+                {pool.map((s) => (
+                  <option
+                    key={s.id}
+                    value={s.name}
+                    disabled={s.name !== name && names.includes(s.name)}
+                  >
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              {circle > 0 && (
+                <button
+                  type="button"
+                  className="icon-button spell-info-button"
+                  aria-label="Conjurar"
+                  disabled={!known || (book && !prepared) || castOptions(b, circle).length === 0}
+                  title={
+                    book && !prepared && name !== ''
+                      ? 'Prepare a magia para conjurá-la.'
+                      : castOptions(b, circle).length === 0
+                        ? 'Sem espaços de magia disponíveis.'
+                        : `Gasta um espaço do ${castOptions(b, circle)[0]!.circle}º círculo.`
+                  }
+                  onClick={() => castAt(b, castOptions(b, circle)[0]!.circle)}
+                >
+                  <Icon name="wand" />
+                </button>
+              )}
+              <button
+                type="button"
+                className="icon-button spell-info-button"
+                aria-label={known ? `Detalhes de ${known.name}` : 'Detalhes da magia'}
+                disabled={!known}
+                onClick={() => known && setShown(known)}
+              >
+                i
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <SpellDialog
+        spell={shown}
+        onClose={() => setShown(null)}
+        cast={
+          shown && shown.circle > 0
+            ? {
+                options: castOptions(b, shown.circle),
+                blocked:
+                  book &&
+                  getPath(b.sheet, `sp.${shown.circle}.${names.indexOf(shown.name)}.p`) !== true,
+                onCast: (c) => castAt(b, c),
+              }
+            : undefined
+        }
+      />
+    </>
   );
 }
 
@@ -920,6 +1004,28 @@ export function SpellsPage({ b }: { b: SheetBinding }) {
           </output>
         </div>
       </div>
+      <div className="spell-rest">
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => {
+            for (const c of Object.keys(spell.slots)) b.set(`sl.${c}.e`, 0);
+          }}
+        >
+          Descanso longo
+        </button>
+        {spell.list === 'bx' && (
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => {
+              for (const c of Object.keys(spell.slots)) b.set(`sl.${c}.e`, 0);
+            }}
+          >
+            Descanso curto
+          </button>
+        )}
+      </div>
       <p className="hint">
         {spell.cantrips > 0 && `Truques: ${cantripNames}/${spell.cantrips}. `}
         {spell.spellLimit > 0 && `${label}: ${spellNames}/${spell.spellLimit}. `}
@@ -951,14 +1057,12 @@ export function SpellsPage({ b }: { b: SheetBinding }) {
                       {total}
                     </output>
                   </div>
-                  <Field
-                    b={b}
-                    label="Espaços gastos"
-                    path={`sl.${circle}.e`}
-                    type="number"
-                    min={0}
-                    max={total}
-                  />
+                  <div className="sf">
+                    <span>Espaços gastos</span>
+                    <output className="big" aria-label={`Espaços gastos do círculo ${circle}`}>
+                      {spentAt(b, circle)}
+                    </output>
+                  </div>
                 </div>
               )}
               <SpellLines

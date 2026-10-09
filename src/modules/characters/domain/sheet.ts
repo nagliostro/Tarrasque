@@ -32,6 +32,15 @@ export {
 } from './rules/classic';
 export { CLASSES, FIGHTING_STYLES } from './rules/classes';
 export { ARMORS, MAX_MAGIC_BONUS, WEAPONS } from './rules/equipment';
+export {
+  SCHOOLS,
+  SPELLS,
+  SPELL_CLASSES,
+  findSpell,
+  spellsFor,
+  type Spell,
+  type SpellClass,
+} from './rules/spells';
 export { ALIGNMENTS, BACKGROUNDS, RACES } from './rules/lineage';
 
 export const COINS = [

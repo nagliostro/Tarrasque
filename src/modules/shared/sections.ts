@@ -12,6 +12,7 @@ export type IconName =
   | 'gear'
   | 'plus'
   | 'close-icon'
+  | 'wand'
   | 'arrow';
 
 export interface Section {
